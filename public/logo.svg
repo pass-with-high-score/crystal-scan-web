@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+  <defs>
+    <radialGradient id="bgDefault" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#3A1D8C"/>
+      <stop offset="100%" stop-color="#0B0518"/>
+    </radialGradient>
+    <linearGradient id="finderDefault" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#C8B6FF"/>
+    </linearGradient>
+    <filter id="glowDefault" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+  </defs>
+
+  <rect width="108" height="108" fill="url(#bgDefault)"/>
+
+  <!-- Corner brackets (viewfinder) -->
+  <g fill="#03DAC6">
+    <!-- TL -->
+    <path d="M22,22 h18 v5 h-13 v13 h-5 z"/>
+    <!-- TR -->
+    <path d="M86,22 h-18 v5 h13 v13 h5 z"/>
+    <!-- BL -->
+    <path d="M22,86 h18 v-5 h-13 v-13 h-5 z"/>
+    <!-- BR -->
+    <path d="M86,86 h-18 v-5 h13 v-13 h5 z"/>
+  </g>
+
+  <!-- QR finder pattern (centered) -->
+  <g fill="url(#finderDefault)">
+    <!-- outer ring (4 bars) -->
+    <rect x="40" y="40" width="28" height="6"/>
+    <rect x="40" y="62" width="28" height="6"/>
+    <rect x="40" y="40" width="6" height="28"/>
+    <rect x="62" y="40" width="6" height="28"/>
+    <!-- inner solid -->
+    <rect x="48" y="48" width="12" height="12"/>
+  </g>
+
+  <!-- Scan dot accent -->
+  <circle cx="93" cy="54" r="4" fill="#03DAC6" filter="url(#glowDefault)" opacity="0.85"/>
+  <circle cx="93" cy="54" r="2.4" fill="#FFFFFF"/>
+</svg>
