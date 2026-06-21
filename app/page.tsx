@@ -84,6 +84,9 @@ export default function Home() {
               Explore Features
             </a>
           </div>
+          <div className="mt-12 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 relative aspect-[1024/500]">
+            <Image src="/featureGraphic.png" alt="Crystal Scan Feature Graphic" fill className="object-cover" />
+          </div>
         </div>
       </section>
 
@@ -147,8 +150,8 @@ export default function Home() {
               </ul>
             </div>
             <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-4 w-full">
-              {[1, 2, 3].map((num) => (
-                <div key={num} className={`relative aspect-[9/19] rounded-2xl overflow-hidden shadow-xl border border-zinc-100 dark:border-zinc-800 transition-transform hover:-translate-y-2 ${num === 3 ? 'hidden sm:block' : ''}`}>
+              {[1, 2, 3, 4, 5, 6].map((num) => (
+                <div key={num} className={`relative aspect-[9/19] rounded-2xl overflow-hidden shadow-xl border border-zinc-100 dark:border-zinc-800 transition-transform hover:-translate-y-2 ${[3, 6].includes(num) ? 'hidden sm:block' : ''}`}>
                   <Image 
                     src={`/screenshots/${num}.jpg`} 
                     alt={`Screenshot ${num}`} 
