@@ -135,8 +135,8 @@ export default function Home() {
               <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 Experience a modern interface that adapts to your system theme. Designed with focus on usability and aesthetics.
               </p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 text-left">
-                {['Modern Design', 'Privacy Focused', 'Ad-Free Experience'].map((item) => (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                {['Modern Design', 'Privacy Focused', 'Ad-Free Experience', 'Smart Reminders', 'App Shortcuts', 'Global Access'].map((item) => (
                   <li key={item} className="flex items-center gap-3 font-semibold">
                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
                       <Check className="w-3.5 h-3.5" />

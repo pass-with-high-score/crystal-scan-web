@@ -8,7 +8,7 @@ export default function TermsOfService() {
           ← Back to Home
         </Link>
         <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mb-4">Last Updated: May 17, 2026</p>
+        <p className="text-zinc-500 dark:text-zinc-400 mb-4">Last Updated: June 21, 2026</p>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
@@ -51,7 +51,14 @@ export default function TermsOfService() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">5. Intellectual Property</h2>
+          <h2 className="text-2xl font-semibold mb-4">5. App Communications</h2>
+          <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            Crystal Scan may send you local notifications or reminders. You can opt-out of these communications at any time through the application settings or your device's system settings.
+          </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">6. Intellectual Property</h2>
           <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
             All rights, title, and interest in and to the application (including logos, UI design, and code) are and will remain the exclusive property of Crystal Scan.
           </p>

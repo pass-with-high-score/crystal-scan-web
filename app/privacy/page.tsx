@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
           ← Back to Home
         </Link>
         <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mb-4">Last Updated: May 17, 2026</p>
+        <p className="text-zinc-500 dark:text-zinc-400 mb-4">Last Updated: June 21, 2026</p>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
@@ -26,6 +26,7 @@ export default function PrivacyPolicy() {
             <li><strong>Local Storage:</strong> All your scan history and generated QR codes are stored locally on your device.</li>
             <li><strong>Camera Access:</strong> We require camera access solely for the purpose of scanning QR codes and Barcodes.</li>
             <li><strong>Gallery Access:</strong> We require gallery access only when you choose to scan an image from your device or save a generated QR code.</li>
+            <li><strong>Local Notifications:</strong> We use local notifications to provide friendly reminders. These are triggered on-device based on local app activity. No usage data is transmitted to our servers to facilitate this feature.</li>
           </ul>
         </section>
 
