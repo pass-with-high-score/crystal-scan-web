@@ -41,13 +41,13 @@ export default function PromoPage() {
 
   const handleClaim = async () => {
     if (!username.trim()) {
-      setError("Vui lòng nhập Telegram username của bạn.");
+      setError("Please enter your Telegram username.");
       return;
     }
 
     if (!isValidUsername(username)) {
       setError(
-        "Username Telegram không hợp lệ. Username phải từ 5-32 ký tự, chỉ gồm chữ cái, số và dấu gạch dưới, bắt đầu bằng chữ cái."
+        "Invalid Telegram username. Must be 5-32 characters, letters, numbers, and underscores, starting with a letter."
       );
       return;
     }
@@ -73,7 +73,7 @@ export default function PromoPage() {
       setClaimedCode(data.code);
       fetchStats();
     } catch {
-      setError("Lỗi kết nối. Vui lòng thử lại.");
+      setError("Connection error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +103,7 @@ export default function PromoPage() {
           </Link>
           {stats && (
             <div className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              <span className="text-blue-600 dark:text-blue-400 font-bold">{stats.remaining}</span> codes còn lại
+              <span className="text-blue-600 dark:text-blue-400 font-bold">{stats.remaining}</span> codes remaining
             </div>
           )}
         </div>
@@ -119,10 +119,10 @@ export default function PromoPage() {
               <span>Limited Promotion</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
-              Nhận <span className="text-blue-600">Promotion Code</span>
+              Claim <span className="text-blue-600">Promotion Code</span>
             </h1>
             <p className="text-base text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-sm mx-auto">
-              Nhập Telegram username để nhận code miễn phí cho Crystal Scan Pro.
+              Enter your Telegram username to claim a free promo code for Crystal Scan Pro.
             </p>
           </div>
 
@@ -130,7 +130,7 @@ export default function PromoPage() {
           {stats && stats.total > 0 && (
             <div className="mb-6 px-1">
               <div className="flex justify-between text-xs text-zinc-400 dark:text-zinc-500 mb-2 font-medium">
-                <span>Đã nhận: {stats.claimed}/{stats.total}</span>
+                <span>Claimed: {stats.claimed}/{stats.total}</span>
                 <span>{progressPercent}%</span>
               </div>
               <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -166,13 +166,13 @@ export default function PromoPage() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleClaim();
                       }}
-                      placeholder="username (không cần @)"
+                      placeholder="username (without @)"
                       className="w-full h-13 pl-12 pr-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-foreground placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all text-sm"
                       disabled={isLoading}
                     />
                   </div>
                   <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5">
-                    Ví dụ: <span className="font-mono">durov</span> · Từ 5-32 ký tự, chữ cái, số và _
+                    Example: <span className="font-mono">durov</span> · 5-32 characters, letters, numbers, and _
                   </p>
                 </div>
 
@@ -193,18 +193,18 @@ export default function PromoPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Đang xử lý...
+                      Processing...
                     </>
                   ) : (
                     <>
                       <Gift className="w-4 h-4" />
-                      Nhận Code Ngay
+                      Claim Code Now
                     </>
                   )}
                 </button>
 
                 <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center mt-4 leading-relaxed">
-                  Mỗi tài khoản Telegram chỉ được nhận 1 code duy nhất.
+                  Each Telegram account can only claim one code.
                 </p>
               </>
             ) : (
@@ -213,9 +213,9 @@ export default function PromoPage() {
                 <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto mb-5">
                   <CheckCircle className="w-8 h-8 text-emerald-500" />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Chúc mừng! 🎉</h2>
+                <h2 className="text-xl font-bold mb-2">Congratulations! 🎉</h2>
                 <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">
-                  Code của bạn đã sẵn sàng. Hãy copy và sử dụng trên Google Play.
+                  Your code is ready. Please copy and redeem it on Google Play.
                 </p>
 
                 {/* Code display */}
@@ -236,7 +236,7 @@ export default function PromoPage() {
                   {copied ? (
                     <>
                       <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      <span className="text-emerald-600 dark:text-emerald-400">Đã copy!</span>
+                      <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
                     </>
                   ) : (
                     <>
@@ -253,7 +253,7 @@ export default function PromoPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 mt-4 text-xs text-blue-600 dark:text-blue-400 hover:underline transition-colors font-medium"
                 >
-                  Đổi code trên Google Play →
+                  Redeem code on Google Play →
                 </a>
               </div>
             )}

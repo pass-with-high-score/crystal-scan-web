@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     if (!username || typeof username !== "string") {
       return Response.json(
-        { error: "Vui lòng nhập Telegram username." },
+        { error: "Please enter your Telegram username." },
         { status: 400 }
       );
     }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           error:
-            "Username Telegram không hợp lệ. Username phải từ 5-32 ký tự, chỉ gồm chữ cái, số và dấu gạch dưới, bắt đầu bằng chữ cái.",
+            "Invalid Telegram username. It must be 5-32 characters, alphanumeric and underscores, and start with a letter.",
         },
         { status: 400 }
       );
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     if (claimDoc.exists) {
       return Response.json(
         {
-          error: `Username @${normalizedUsername} đã nhận code rồi. Mỗi người chỉ được nhận 1 code.`,
+          error: `Username @${normalizedUsername} has already claimed a code. Each person can only claim one code.`,
           alreadyClaimed: true,
         },
         { status: 409 }
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     if (availableCodes.length === 0) {
       return Response.json(
-        { error: "Rất tiếc, tất cả code đã được nhận hết!" },
+        { error: "Sorry, all codes have been claimed!" },
         { status: 410 }
       );
     }
@@ -114,12 +114,12 @@ export async function POST(request: NextRequest) {
     return Response.json({
       success: true,
       code: assignedCode,
-      message: `Chúc mừng @${normalizedUsername}! Bạn đã nhận được code.`,
+      message: `Congratulations @${normalizedUsername}! You have successfully claimed a code.`,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Claim error:", err);
     return Response.json(
-      { error: "Đã xảy ra lỗi. Vui lòng thử lại." },
+      { error: "An error occurred. Please try again." },
       { status: 500 }
     );
   }
