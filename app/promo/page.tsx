@@ -19,6 +19,37 @@ export default function PromoPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [stats, setStats] = useState<StatsData | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
+
+  useEffect(() => {
+    // Target date: Sunday, July 12, 2026, 23:59:59 (Indochina Time)
+    const targetDate = new Date("2026-07-12T23:59:59+07:00").getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(interval);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -125,6 +156,31 @@ export default function PromoPage() {
               Enter your Telegram username to claim a free promo code for Crystal Scan Pro.
             </p>
           </div>
+
+          {/* Countdown */}
+          {timeLeft && (
+            <div className="flex justify-center gap-2 sm:gap-3 mb-8">
+              <div className="flex flex-col items-center p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl min-w-[60px] sm:min-w-[70px] shadow-sm">
+                <span className="text-xl sm:text-2xl font-bold text-foreground">{timeLeft.days}</span>
+                <span className="text-[9px] sm:text-[10px] uppercase text-zinc-500 font-semibold tracking-wider mt-0.5">Days</span>
+              </div>
+              <div className="flex flex-col items-center justify-center font-bold text-zinc-300 dark:text-zinc-700">:</div>
+              <div className="flex flex-col items-center p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl min-w-[60px] sm:min-w-[70px] shadow-sm">
+                <span className="text-xl sm:text-2xl font-bold text-foreground">{timeLeft.hours.toString().padStart(2, "0")}</span>
+                <span className="text-[9px] sm:text-[10px] uppercase text-zinc-500 font-semibold tracking-wider mt-0.5">Hours</span>
+              </div>
+              <div className="flex flex-col items-center justify-center font-bold text-zinc-300 dark:text-zinc-700">:</div>
+              <div className="flex flex-col items-center p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl min-w-[60px] sm:min-w-[70px] shadow-sm">
+                <span className="text-xl sm:text-2xl font-bold text-foreground">{timeLeft.minutes.toString().padStart(2, "0")}</span>
+                <span className="text-[9px] sm:text-[10px] uppercase text-zinc-500 font-semibold tracking-wider mt-0.5">Mins</span>
+              </div>
+              <div className="flex flex-col items-center justify-center font-bold text-zinc-300 dark:text-zinc-700">:</div>
+              <div className="flex flex-col items-center p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl min-w-[60px] sm:min-w-[70px] shadow-sm">
+                <span className="text-xl sm:text-2xl font-bold text-foreground">{timeLeft.seconds.toString().padStart(2, "0")}</span>
+                <span className="text-[9px] sm:text-[10px] uppercase text-zinc-500 font-semibold tracking-wider mt-0.5">Secs</span>
+              </div>
+            </div>
+          )}
 
           {/* Progress bar */}
           {stats && stats.total > 0 && (
