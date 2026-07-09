@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Scan, Palette, History, Check, Menu, X } from "lucide-react";
+import { FaGooglePlay } from "react-icons/fa";
+
+const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.nqmgaming.crystal_scan";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +25,10 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             <a href="#features" className="hover:text-foreground transition-colors duration-200">Features</a>
             <a href="#design" className="hover:text-foreground transition-colors duration-200">Design</a>
-            <Link href="/tester" className="bg-foreground text-background px-5 py-2 rounded-full hover:opacity-90 transition-all active:scale-95">Download Now</Link>
+            <a href={GOOGLE_PLAY_URL} target="_blank" rel="noopener noreferrer" className="bg-foreground text-background px-5 py-2 rounded-full hover:opacity-90 transition-all active:scale-95 inline-flex items-center gap-2">
+              <FaGooglePlay className="w-4 h-4" />
+              Google Play
+            </a>
           </div>
           <div className="md:hidden">
             <button 
@@ -53,13 +59,16 @@ export default function Home() {
               Design
             </a>
             <hr className="border-zinc-100 dark:border-zinc-800" />
-            <Link 
-              href="/tester" 
+            <a 
+              href={GOOGLE_PLAY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={toggleMenu}
-              className="bg-foreground text-background py-4 rounded-xl font-bold text-center hover:opacity-90 transition-all active:scale-95"
+              className="bg-foreground text-background py-4 rounded-xl font-bold text-center hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
-              Download Now
-            </Link>
+              <FaGooglePlay className="w-5 h-5" />
+              Google Play
+            </a>
           </div>
         </div>
       </nav>
@@ -77,9 +86,10 @@ export default function Home() {
             Fast and reliable QR & Barcode scanner with built-in design tools to create, customize, and organize your digital world.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-8 w-full sm:w-auto px-4 sm:px-0">
-            <Link href="/tester" className="h-14 px-8 flex items-center justify-center bg-foreground text-background rounded-2xl font-semibold text-lg hover:scale-105 active:scale-95 transition-all">
-              Get Started for Free
-            </Link>
+            <a href={GOOGLE_PLAY_URL} target="_blank" rel="noopener noreferrer" className="h-14 px-8 flex items-center justify-center gap-2 bg-foreground text-background rounded-2xl font-semibold text-lg hover:scale-105 active:scale-95 transition-all">
+              <FaGooglePlay className="w-5 h-5" />
+              Get it on Google Play
+            </a>
             <a href="#features" className="h-14 px-8 flex items-center justify-center border border-zinc-200 dark:border-zinc-800 rounded-2xl font-semibold text-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all">
               Explore Features
             </a>
@@ -174,9 +184,10 @@ export default function Home() {
             Join thousands of users who trust Crystal Scan for their daily utility needs. Fast, secure, and beautiful.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6 relative z-10">
-            <Link href="/tester" className="bg-white text-black px-8 md:px-10 py-4 md:py-5 rounded-2xl font-bold text-lg md:text-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-3">
-              Join Closed Testing
-            </Link>
+            <a href={GOOGLE_PLAY_URL} target="_blank" rel="noopener noreferrer" className="bg-white text-black px-8 md:px-10 py-4 md:py-5 rounded-2xl font-bold text-lg md:text-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-3">
+              <FaGooglePlay className="w-5 h-5" />
+              Get it on Google Play
+            </a>
           </div>
         </div>
       </section>
