@@ -10,10 +10,20 @@ function initFirebase() {
   const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
   if (serviceAccountKey) {
-    const serviceAccount = JSON.parse(serviceAccountKey) as ServiceAccount;
-    initializeApp({
-      credential: cert(serviceAccount),
-    });
+    try {
+      const serviceAccount = JSON.parse(serviceAccountKey) as ServiceAccount;
+      // Vercel env vars sometimes escape newlines as literal '\n' strings. 
+      // We must convert them back to actual newline characters for OpenSSL to read the PEM key.
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+      }
+      initializeApp({
+        credential: cert(serviceAccount),
+      });
+    } catch (error) {
+      console.error("Firebase Admin Init Error:", error);
+      // Fallback for build time if JSON is malformed
+    }
   } else {
     // Fallback: Application Default Credentials (local dev with gcloud auth)
     initializeApp({
