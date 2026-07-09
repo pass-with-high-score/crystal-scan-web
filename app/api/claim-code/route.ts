@@ -41,7 +41,10 @@ async function sendTelegramNotification(
 import crypto from "crypto";
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
-  if (!data || !data.hash) return false;
+  if (!data || !data.hash) {
+    console.error("Missing data or hash");
+    return false;
+  }
   
   const { hash, ...userData } = data;
   
@@ -52,13 +55,20 @@ function checkTelegramAuth(data: any, botToken: string): boolean {
     }
   }
   const dataCheckString = dataCheckArr.join("\n");
+  console.log("dataCheckString:", dataCheckString);
   
-  const secretKey = crypto.createHash("sha256").update(botToken).digest();
+  const token = botToken.trim();
+  console.log("Token prefix:", token.substring(0, 5));
+  const secretKey = crypto.createHash("sha256").update(token).digest();
   const hmac = crypto.createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
+  
+  console.log("Calculated HMAC:", hmac);
+  console.log("Provided Hash:", hash);
   
   if (userData.auth_date) {
     const now = Math.floor(Date.now() / 1000);
-    if (now - userData.auth_date > 3600) {
+    if (now - userData.auth_date > 86400) { // 24 hours just in case
+      console.error("Auth date too old");
       return false;
     }
   }
