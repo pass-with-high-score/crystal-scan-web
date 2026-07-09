@@ -11,12 +11,13 @@ function initFirebase() {
 
   if (serviceAccountKey) {
     try {
-      const serviceAccount = JSON.parse(serviceAccountKey) as ServiceAccount;
-      // Vercel env vars sometimes escape newlines as literal '\n' strings. 
-      // We must convert them back to actual newline characters for OpenSSL to read the PEM key.
-      if (serviceAccount.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
-      }
+      const raw = JSON.parse(serviceAccountKey);
+      
+      const serviceAccount: ServiceAccount = {
+        projectId: raw.project_id,
+        clientEmail: raw.client_email,
+        privateKey: raw.private_key?.replace(/\\n/g, "\n"),
+      };
       initializeApp({
         credential: cert(serviceAccount),
       });
