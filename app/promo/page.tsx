@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Gift, Copy, CheckCircle, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
-import { FaTelegram } from "react-icons/fa";
 
 interface StatsData {
   total: number;
@@ -12,8 +11,24 @@ interface StatsData {
   remaining: number;
 }
 
+interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
+}
+
+declare global {
+  interface Window {
+    onTelegramAuth: (user: TelegramUser) => void;
+  }
+}
+
 export default function PromoPage() {
-  const [username, setUsername] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [claimedCode, setClaimedCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +40,23 @@ export default function PromoPage() {
     minutes: number;
     seconds: number;
   } | null>(null);
+
+  useEffect(() => {
+    window.onTelegramAuth = (user: TelegramUser) => {
+      handleClaimWithTelegram(user);
+    };
+
+    if (containerRef.current && !containerRef.current.firstChild) {
+      const script = document.createElement("script");
+      script.src = "https://telegram.org/js/telegram-widget.js?22";
+      script.setAttribute("data-telegram-login", "grabifyz_bot");
+      script.setAttribute("data-size", "large");
+      script.setAttribute("data-onauth", "onTelegramAuth(user)");
+      script.setAttribute("data-request-access", "write");
+      script.async = true;
+      containerRef.current.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     // Target date: Sunday, July 12, 2026, 23:59:59 (Indochina Time)
@@ -65,24 +97,7 @@ export default function PromoPage() {
     fetchStats();
   }, [fetchStats]);
 
-  const isValidUsername = (name: string): boolean => {
-    const clean = name.replace(/^@/, "").trim().toLowerCase();
-    return /^[a-z][a-z0-9_]{3,30}[a-z0-9]$/.test(clean);
-  };
-
-  const handleClaim = async () => {
-    if (!username.trim()) {
-      setError("Please enter your Telegram username.");
-      return;
-    }
-
-    if (!isValidUsername(username)) {
-      setError(
-        "Invalid Telegram username. Must be 5-32 characters, letters, numbers, and underscores, starting with a letter."
-      );
-      return;
-    }
-
+  const handleClaimWithTelegram = async (user: TelegramUser) => {
     setIsLoading(true);
     setError(null);
     setClaimedCode(null);
@@ -91,7 +106,7 @@ export default function PromoPage() {
       const res = await fetch("/api/claim-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username.trim() }),
+        body: JSON.stringify(user),
       });
 
       const data = await res.json();
@@ -202,64 +217,32 @@ export default function PromoPage() {
           <div className="bg-background p-6 sm:p-8 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800">
             {!claimedCode ? (
               <>
-                {/* Input */}
-                <div className="mb-5">
-                  <label htmlFor="telegram-username" className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block">
-                    Telegram Username
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500">
-                      <FaTelegram className="w-5 h-5" />
-                    </div>
-                    <input
-                      id="telegram-username"
-                      type="text"
-                      value={username}
-                      onChange={(e) => {
-                        setUsername(e.target.value);
-                        setError(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleClaim();
-                      }}
-                      placeholder="username (without @)"
-                      className="w-full h-13 pl-12 pr-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-foreground placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all text-sm"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1.5">
-                    Example: <span className="font-mono">durov</span> · 5-32 characters, letters, numbers, and _
-                  </p>
-                </div>
-
                 {/* Error */}
                 {error && (
-                  <div className="mb-4 flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
+                  <div className="mb-6 flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
                     <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                     <span>{error}</span>
                   </div>
                 )}
 
-                {/* Submit button - same style as landing page CTA */}
-                <button
-                  onClick={handleClaim}
-                  disabled={isLoading || !username.trim() || !isValidUsername(username)}
-                  className="w-full h-12 bg-foreground text-background rounded-2xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98] cursor-pointer"
-                >
+                {/* Telegram Widget Container */}
+                <div className="flex flex-col items-center justify-center min-h-[100px]">
                   {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Processing...
-                    </>
+                    <div className="flex flex-col items-center text-zinc-500">
+                      <Loader2 className="w-8 h-8 animate-spin mb-3 text-blue-500" />
+                      <p className="text-sm font-medium">Processing your claim...</p>
+                    </div>
                   ) : (
                     <>
-                      <Gift className="w-4 h-4" />
-                      Claim Code Now
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4 text-center font-medium">
+                        Log in with Telegram to securely claim your code.
+                      </p>
+                      <div ref={containerRef} className="flex justify-center scale-110 origin-center transition-transform" />
                     </>
                   )}
-                </button>
+                </div>
 
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center mt-4 leading-relaxed">
+                <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center mt-6 leading-relaxed">
                   Each Telegram account can only claim one code.
                 </p>
               </>

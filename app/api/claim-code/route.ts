@@ -38,40 +38,56 @@ async function sendTelegramNotification(
   });
 }
 
+import crypto from "crypto";
+
+function checkTelegramAuth(data: any, botToken: string): boolean {
+  if (!data || !data.hash) return false;
+  
+  const { hash, ...userData } = data;
+  
+  const dataCheckArr = [];
+  for (const key of Object.keys(userData).sort()) {
+    if (userData[key] !== undefined && userData[key] !== null) {
+      dataCheckArr.push(`${key}=${userData[key]}`);
+    }
+  }
+  const dataCheckString = dataCheckArr.join("\n");
+  
+  const secretKey = crypto.createHash("sha256").update(botToken).digest();
+  const hmac = crypto.createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
+  
+  if (userData.auth_date) {
+    const now = Math.floor(Date.now() / 1000);
+    if (now - userData.auth_date > 3600) {
+      return false;
+    }
+  }
+  
+  return hmac === hash;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { username } = await request.json();
+    const userData = await request.json();
 
-    if (!username || typeof username !== "string") {
+    if (!checkTelegramAuth(userData, BOT_TOKEN)) {
       return Response.json(
-        { error: "Please enter your Telegram username." },
-        { status: 400 }
+        { error: "Invalid Telegram authentication." },
+        { status: 401 }
       );
     }
 
-    // Normalize username: remove @ if present, trim
-    const normalizedUsername = username.replace(/^@/, "").trim().toLowerCase();
+    const userId = userData.id.toString();
+    const displayUsername = userData.username || userData.first_name || userId;
 
-    // Telegram username rules: 5-32 chars, a-z, 0-9, underscore, must start with a letter
-    const telegramUsernameRegex = /^[a-z][a-z0-9_]{3,30}[a-z0-9]$/;
-    if (!telegramUsernameRegex.test(normalizedUsername)) {
-      return Response.json(
-        {
-          error:
-            "Invalid Telegram username. It must be 5-32 characters, alphanumeric and underscores, and start with a letter.",
-        },
-        { status: 400 }
-      );
-    }
-
-    // Check if username already claimed (use username as document ID)
-    const claimRef = db.collection(COLLECTION_NAME).doc(normalizedUsername);
+    // Check if user already claimed (use Telegram ID as document ID)
+    const claimRef = db.collection(COLLECTION_NAME).doc(userId);
     const claimDoc = await claimRef.get();
 
     if (claimDoc.exists) {
       return Response.json(
         {
-          error: `Username @${normalizedUsername} has already claimed a code. Each person can only claim one code.`,
+          error: `You have already claimed a code. Each person can only claim one code.`,
           alreadyClaimed: true,
         },
         { status: 409 }
@@ -99,22 +115,24 @@ export async function POST(request: NextRequest) {
     // Assign the first available code
     const assignedCode = availableCodes[0];
 
-    // Save claim to Firestore (use username as doc ID to prevent duplicates)
+    // Save claim to Firestore
     await claimRef.set({
-      username: normalizedUsername,
+      userId: userId,
+      username: userData.username || null,
+      firstName: userData.first_name || null,
       code: assignedCode,
       claimedAt: new Date().toISOString(),
     });
 
     // Send Telegram notification (non-blocking)
-    sendTelegramNotification(normalizedUsername, assignedCode).catch((err) =>
+    sendTelegramNotification(displayUsername, assignedCode).catch((err) =>
       console.error("Telegram notification failed:", err)
     );
 
     return Response.json({
       success: true,
       code: assignedCode,
-      message: `Congratulations @${normalizedUsername}! You have successfully claimed a code.`,
+      message: `Congratulations! You have successfully claimed a code.`,
     });
   } catch (err: any) {
     console.error("Claim error:", err);
