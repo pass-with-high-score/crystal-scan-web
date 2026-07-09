@@ -34,6 +34,7 @@ export default function PromoPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [stats, setStats] = useState<StatsData | null>(null);
+  const [isAlreadyClaimed, setIsAlreadyClaimed] = useState(false);
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -101,6 +102,7 @@ export default function PromoPage() {
     setIsLoading(true);
     setError(null);
     setClaimedCode(null);
+    setIsAlreadyClaimed(false);
 
     try {
       const res = await fetch("/api/claim-code", {
@@ -112,7 +114,13 @@ export default function PromoPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error);
+        if (res.status === 409 && data.alreadyClaimed && data.code) {
+          setClaimedCode(data.code);
+          setIsAlreadyClaimed(true);
+          fetchStats();
+        } else {
+          setError(data.error);
+        }
         return;
       }
 
@@ -252,9 +260,13 @@ export default function PromoPage() {
                 <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto mb-5">
                   <CheckCircle className="w-8 h-8 text-emerald-500" />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Congratulations! 🎉</h2>
+                <h2 className="text-xl font-bold mb-2">
+                  {isAlreadyClaimed ? "Welcome back! 🌟" : "Congratulations! 🎉"}
+                </h2>
                 <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">
-                  Your code is ready. Please copy and redeem it on Google Play.
+                  {isAlreadyClaimed
+                    ? "Here is your previously claimed code. You can redeem it on Google Play."
+                    : "Your code is ready. Please copy and redeem it on Google Play."}
                 </p>
 
                 {/* Code display */}

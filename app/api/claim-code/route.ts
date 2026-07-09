@@ -95,10 +95,12 @@ export async function POST(request: NextRequest) {
     const claimDoc = await claimRef.get();
 
     if (claimDoc.exists) {
+      const existingData = claimDoc.data();
       return Response.json(
         {
-          error: `You have already claimed a code. Each person can only claim one code.`,
+          error: `Welcome back! Here is your previously claimed code.`,
           alreadyClaimed: true,
+          code: existingData?.code,
         },
         { status: 409 }
       );
