@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Scan, Palette, History, Check, Menu, X } from "lucide-react";
 import { FaGooglePlay } from "react-icons/fa";
 
-const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.nqmgaming.crystal_scan";
+const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=app.pwhs.crystalscan";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
