@@ -63,14 +63,14 @@ export default function PromoPage() {
     // Target date: end of August, August 31, 2026, 23:59:59 (Indochina Time)
     const targetDate = new Date("2026-08-31T23:59:59+07:00").getTime();
 
-    const interval = setInterval(() => {
+    // Returns false once the promotion is over, so the caller can stop ticking
+    const tick = () => {
       const now = new Date().getTime();
       const distance = targetDate - now;
 
       if (distance < 0) {
-        clearInterval(interval);
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
+        return false;
       }
 
       setTimeLeft({
@@ -79,6 +79,14 @@ export default function PromoPage() {
         minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
         seconds: Math.floor((distance % (1000 * 60)) / 1000),
       });
+      return true;
+    };
+
+    // Show the countdown on first paint instead of after a blank second
+    if (!tick()) return;
+
+    const interval = setInterval(() => {
+      if (!tick()) clearInterval(interval);
     }, 1000);
 
     return () => clearInterval(interval);
