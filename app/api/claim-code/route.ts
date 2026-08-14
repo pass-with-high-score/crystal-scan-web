@@ -4,15 +4,19 @@ import { db } from "@/lib/firebase-admin";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 
-// All promotion codes
-const PROMO_CODES = process.env.PROMOTION_CODES
-  ? process.env.PROMOTION_CODES.split(",").map((code) => code.trim()).filter((code) => code.length > 0)
-  : [];
-
 // Force dynamic to avoid caching
 export const dynamic = "force-dynamic";
 
+// Per-user claim records, keyed by Telegram user id
 const COLLECTION_NAME = "promo_claims";
+// The pool of promotion codes, keyed by the code itself.
+// Seed it with: node --env-file=.env.local scripts/seed-promo-codes.mjs <csv>
+const CODES_COLLECTION = "promo_codes";
+
+type ClaimResult =
+  | { status: "claimed"; code: string }
+  | { status: "already"; code?: string }
+  | { status: "soldOut" };
 
 async function sendTelegramNotification(
   username: string,
@@ -90,60 +94,69 @@ export async function POST(request: NextRequest) {
     const userId = userData.id.toString();
     const displayUsername = userData.username || userData.first_name || userId;
 
-    // Check if user already claimed (use Telegram ID as document ID)
+    // Claim record uses the Telegram ID as document ID
     const claimRef = db.collection(COLLECTION_NAME).doc(userId);
-    const claimDoc = await claimRef.get();
+    const claimedAt = new Date().toISOString();
 
-    if (claimDoc.exists) {
-      const existingData = claimDoc.data();
+    // Reserve a code atomically so two concurrent claims can never share one
+    const result = await db.runTransaction<ClaimResult>(async (tx) => {
+      const claimDoc = await tx.get(claimRef);
+      if (claimDoc.exists) {
+        return { status: "already", code: claimDoc.data()?.code };
+      }
+
+      const available = await tx.get(
+        db.collection(CODES_COLLECTION).where("claimed", "==", false).limit(1)
+      );
+      if (available.empty) {
+        return { status: "soldOut" };
+      }
+
+      const codeDoc = available.docs[0];
+
+      tx.update(codeDoc.ref, {
+        claimed: true,
+        claimedBy: userId,
+        claimedAt,
+      });
+
+      tx.set(claimRef, {
+        userId: userId,
+        username: userData.username || null,
+        firstName: userData.first_name || null,
+        code: codeDoc.id,
+        claimedAt,
+      });
+
+      return { status: "claimed", code: codeDoc.id };
+    });
+
+    if (result.status === "already") {
       return Response.json(
         {
           error: `Welcome back! Here is your previously claimed code.`,
           alreadyClaimed: true,
-          code: existingData?.code,
+          code: result.code,
         },
         { status: 409 }
       );
     }
 
-    // Get all claimed codes
-    const claimsSnapshot = await db.collection(COLLECTION_NAME).get();
-    const claimedCodes = new Set(
-      claimsSnapshot.docs.map((doc) => doc.data().code as string)
-    );
-
-    // Find unclaimed codes
-    const availableCodes = PROMO_CODES.filter(
-      (code) => !claimedCodes.has(code)
-    );
-
-    if (availableCodes.length === 0) {
+    if (result.status === "soldOut") {
       return Response.json(
         { error: "Sorry, all codes have been claimed!" },
         { status: 410 }
       );
     }
 
-    // Assign the first available code
-    const assignedCode = availableCodes[0];
-
-    // Save claim to Firestore
-    await claimRef.set({
-      userId: userId,
-      username: userData.username || null,
-      firstName: userData.first_name || null,
-      code: assignedCode,
-      claimedAt: new Date().toISOString(),
-    });
-
     // Send Telegram notification (non-blocking)
-    sendTelegramNotification(displayUsername, assignedCode).catch((err) =>
+    sendTelegramNotification(displayUsername, result.code).catch((err) =>
       console.error("Telegram notification failed:", err)
     );
 
     return Response.json({
       success: true,
-      code: assignedCode,
+      code: result.code,
       message: `Congratulations! You have successfully claimed a code.`,
     });
   } catch (err: any) {
@@ -157,19 +170,22 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const claimsSnapshot = await db.collection(COLLECTION_NAME).get();
-    const claimed = claimsSnapshot.size;
+    const codesRef = db.collection(CODES_COLLECTION);
+    const [totalSnapshot, claimedSnapshot] = await Promise.all([
+      codesRef.count().get(),
+      codesRef.where("claimed", "==", true).count().get(),
+    ]);
+
+    const total = totalSnapshot.data().count;
+    const claimed = claimedSnapshot.data().count;
 
     return Response.json({
-      total: PROMO_CODES.length,
+      total,
       claimed,
-      remaining: Math.max(0, PROMO_CODES.length - claimed),
+      remaining: Math.max(0, total - claimed),
     });
-  } catch {
-    return Response.json({
-      total: PROMO_CODES.length,
-      claimed: 0,
-      remaining: PROMO_CODES.length,
-    });
+  } catch (err) {
+    console.error("Stats error:", err);
+    return Response.json({ total: 0, claimed: 0, remaining: 0 });
   }
 }
