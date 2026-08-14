@@ -60,8 +60,8 @@ export default function PromoPage() {
   }, []);
 
   useEffect(() => {
-    // Target date: Sunday, July 12, 2026, 23:59:59 (Indochina Time)
-    const targetDate = new Date("2026-07-12T23:59:59+07:00").getTime();
+    // Target date: end of August, August 31, 2026, 23:59:59 (Indochina Time)
+    const targetDate = new Date("2026-08-31T23:59:59+07:00").getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
